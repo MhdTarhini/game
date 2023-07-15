@@ -9,15 +9,6 @@ gameScene.preload = function () {
     frameWidth: 60,
     frameHeight: 65,
   });
-//     this.load.spritesheet("player-left", "assets/player/left-1.png", {
-//       frameWidth: 64,
-//       frameHeight: 48,
-//     });
-
-//   this.load.spritesheet("player-right", "assets/player/right-1/png", {
-//     frameWidth: 32,
-//     frameHeight: 48,
-//   });
 
   // Load tilemap in JSON format
   this.load.tilemapTiledJSON("wallmap", "wallMap.json");
@@ -28,71 +19,53 @@ gameScene.preload = function () {
 gameScene.create = function () {
   const map = this.make.tilemap({ key: "wallmap" });
   const tileset = map.addTilesetImage("map", "myTileset-image");
-  const layer = map.createStaticLayer("wall", tileset,0,0);
-
-  // Enable collision for specific tile indices
-//   layer.setCollision(12, 44); // Adjust tile index range based on your tileset
-
-  // Enable collision by property
-//   layer.setCollisionByProperty({ collides: true });
+  const layer = map.createStaticLayer("wall", tileset, 0, 0);
   layer.setCollisionByExclusion(-1, true);
-  // Debug rendering
-//   const debugGraphics = this.add.graphics().setAlpha(0.7);
-// layer.renderDebug(debugGraphics, {
-//   tileColor: null, // Color of non-colliding tiles
-//   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-//   faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
 
+  this.player = this.physics.add.sprite(0, 20, "player");
+  this.player.setBounce(0.1);
+  this.player.setCollideWorldBounds(true);
+  this.physics.add.collider(this.player, layer);
 
-// });
-this.player = this.physics.add.sprite(0,20, 'player');
-this.player.setBounce(0.1);
-this.player.setCollideWorldBounds(true);
-this.physics.add.collider(this.player, layer);
+  this.anims.create({
+    key: "left",
+    frames: this.anims.generateFrameNumbers("gamePiece", {
+      start: 7,
+      end: 4,
+    }),
+    frameRate: 10,
+    repeat: -1,
+  });
 
+  this.anims.create({
+    key: "right",
+    frames: this.anims.generateFrameNumbers("gamePiece", {
+      start: 8,
+      end: 11,
+    }),
+    frameRate: 10,
+    repeat: -1,
+  });
 
-this.anims.create({
-  key: "left",
-  frames: this.anims.generateFrameNumbers("gamePiece", {
-    start: 7,
-    end:4,
-  }),
-  frameRate: 10,
-  repeat: -1,
-});
-this.anims.create({
-  key: "right",
-  frames: this.anims.generateFrameNumbers("gamePiece", {
-    start: 8,
-    end: 11,
-  }),
-  frameRate: 10,
-  repeat: -1,
-});
-this.anims.create({
-  key: "stop",
-  frames: this.anims.generateFrameNumbers("gamePiece", {
-    start: 0,
-    end: 0,
-  }),
-  frameRate: 10,
-  repeat: -1,
-});
-//  this.player.anims.play("walk-right");
-this.cursors = this.input.keyboard.createCursorKeys();
-  // Enable physics for the layer
-//   this.physics.world.enable(layer);
+  this.anims.create({
+    key: "stop",
+    frames: this.anims.generateFrameNumbers("gamePiece", {
+      start: 0,
+      end: 0,
+    }),
+    frameRate: 10,
+    repeat: -1,
+  });
 
-  // Collide with other objects
-  // ... add your collision logic here ...
+  this.cursors = this.input.keyboard.createCursorKeys();
 };
-gameScene.update=function(){
+gameScene.update = function () {
   // Control the player with left or right keys
   if (this.cursors.left.isDown) {
     this.player.setVelocityX(-200);
-    // if (this.player.body.onFloor()) {
-    this.player.anims.play("left", true);
-    // }
+    if (this.player.body.onFloor()) {
+      this.player.anims.play("left", true);
+    }
   } else if (this.cursors.right.isDown) {
     this.player.setVelocityX(200);
     if (this.player.body.onFloor()) {
@@ -100,37 +73,15 @@ gameScene.update=function(){
     }
   } else if (this.cursors.up.isDown) {
     this.player.setVelocityY(-200);
-    // if (this.player.body.onFloor()) {
-    //   this.player.play("walk", true);
-    // }
   } else if (this.cursors.down.isDown) {
     this.player.setVelocityY(200);
-    // if (this.player.body.onFloor()) {
-    //   this.player.play("walk", true);
-    // }
   } else {
     // If no keys are pressed, the player keeps still
     this.player.setVelocityX(0);
     this.player.anims.play("stop");
-    // Only show the idle animation if the player is footed
-    // If this is not included, the player would look idle while jumping
-    // if (this.player.body.onFloor()) {
-    //   this.player.play("idle", true);
-    // }
-    this.player.anims.stop(); // Stop the animation when no movement keys are pressed
-    // this.player.setTexture("player", "robo_player_0");
+    this.player.anims.stop();
   }
-
-  // Player can jump while walking any direction by pressing the space bar
-  // or the 'UP' arrow
-//   if (
-//     (this.cursors.space.isDown || this.cursors.up.isDown) &&
-//     this.player.body.onFloor()
-//   ) {
-//     this.player.setVelocityY(-350);
-//     this.player.play("jump", true);
-//   }
-}
+};
 let config = {
   type: Phaser.AUTO,
   width: 800,
